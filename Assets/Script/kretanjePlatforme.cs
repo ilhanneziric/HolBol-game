@@ -18,6 +18,8 @@ public class kretanjePlatforme : MonoBehaviour
     public static int TScoreUI = -1;
     public static int TRecordUI = -1;
     public AudioHB audio;
+    public int targetTime = 1;
+
     private void OnCollisionEnter(Collision other)
     {
         if(other.collider.name == "spawnujponovo")
@@ -25,16 +27,8 @@ public class kretanjePlatforme : MonoBehaviour
         else if (other.collider.name == "kugla" && kraj == 1)
         {
             kraj = 2;
-            Destroy(this.gameObject);
-            if (trenutniScore > player.score)
-            {
-                player.score = trenutniScore;
-                player.SavePlayer();
-            }
-            TRecordUI = player.score;
-            TScoreUI = trenutniScore;
-            trenutniScore = 0;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+            this.transform.position = new Vector3(15, 15, 15);
+            audio.GameOver();
         }
     }
 
@@ -51,8 +45,24 @@ public class kretanjePlatforme : MonoBehaviour
 
     void FixedUpdate()
     {
-        
-        if (this.transform.position.y >= -10.9)
+        if (kraj == 2)
+        {
+            targetTime++;
+            if (targetTime >= 70)
+            {
+                if (trenutniScore > player.score)
+                {
+                    player.score = trenutniScore;
+                    player.SavePlayer();
+                }
+                TRecordUI = player.score;
+                TScoreUI = trenutniScore;
+                trenutniScore = 0;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
+            }
+        }
+
+        if (this.transform.position.y >= -9.9 && kraj == 1) //-10.9 pije, -5.9 poslije ali mislim da je -9.9 najbolje
         {
             Destroy(this.gameObject);
             trenutniScore++;

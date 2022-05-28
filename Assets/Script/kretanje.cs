@@ -1,30 +1,57 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ScriptableObjects;
 using UnityEngine;
 
 public class kretanje : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
     public float speed = 0.2f;
-    public Joystick joystick;
+    
+    [SerializeField]
+    private GameMetrics Metrics;
+
+    [SerializeField]
+    private ParticleSystem kuglaDestroyEffect;
+
+    public Player player;
+
+    private int kraj = 1;
 
     private void Start()
     {
-        joystick = FindObjectOfType<Joystick>();
+        player = GameObject.FindObjectOfType(typeof(Player)) as Player;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        var rigid = GetComponent<Rigidbody>();
-         // Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-         // Vector3 pos = mainCamera.ScreenToViewportPoint(Input.mousePosition);
-         // if (Physics.Raycast(ray, out RaycastHit raycasthit))
-         // {
-         //     transform.position = new Vector3((pos.x - 0.5f) *3 ,-10,(pos.y - 0.5f) *3 );
-         // }
-        
-        transform.Translate(Input.acceleration.x * speed, 0, Input.acceleration.y * speed);
-        //rigid.velocity = new Vector3(joystick.Horizontal * 5f, rigid.velocity.y, joystick.Vertical * 5f);
+        if (Input.acceleration.z < 0)
+        {
+            transform.Translate((Input.acceleration.x - player.accx) * speed, 0, (Input.acceleration.y - player.accy) * speed);
+        }
+        else
+        {
+            transform.Translate((-Input.acceleration.x + player.accx) * speed, 0, (-Input.acceleration.y + player.accy) * speed);
+        }
+
+        if (kraj == 1)
+        {
+            this.transform.position = new Vector3(
+                Mathf.Clamp(this.transform.position.x, Metrics.LimitLeft, Metrics.LimitRight),
+                -11,
+                Mathf.Clamp(this.transform.position.z, Metrics.LimitLeft, Metrics.LimitRight)
+            );
+        }
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.collider.name != "krug")
+        {
+            Instantiate(kuglaDestroyEffect, transform.position, Quaternion.identity);
+            kraj = 2;
+            this.transform.position = new Vector3(15, 0, 15);
+        }
     }
 }
